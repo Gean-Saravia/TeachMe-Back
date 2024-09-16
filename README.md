@@ -1,2 +1,2 @@
-#<center>TeachMe-Back</center>
+#TeachMe-Back
 Back-TeachMe
