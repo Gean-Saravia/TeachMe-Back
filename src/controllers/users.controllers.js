@@ -1,5 +1,7 @@
 import {sql, getConnection} from '../database/connection.js'
 import bcrypt from 'bcrypt';
+import { SECRET_JWT_KEY } from '../config.js';
+import jwt from 'jsonwebtoken'
 
 export const getUsers = async (req, res) => {
     try {
@@ -55,8 +57,11 @@ export const register = async (req, res) => {
             .input('email', email)
             .query("SELECT * FROM Usuarios WHERE email = @email")
 
+        console.log(doesExist);
+        console.log(email);
+        
         // Si no existe una cuenta con ese mail, procede a registrarse con normalidad
-        if (!doesExist){
+        if (doesExist.recordset.length == 0){
             const result = await pool
                 .request()
                 .input("nombre", sql.VarChar, nombre)
@@ -101,7 +106,7 @@ export const register = async (req, res) => {
                 id: result.recordset[0].id,
             });
         } else {
-            return res.status(400).json({ msg: "Ya existe un usuario con ese correo electrónico" })
+            res.status(400).json({msg: "Ya existe un usuario con ese correo electrónico"})
         }
 
     } catch (error) {
@@ -123,19 +128,28 @@ export const access = async(req,res) =>{
             .query("SELECT * FROM Usuarios WHERE email = @email")
         // Verifica que exista algun usuario en la Base de Datos con ese email registrado
         if(user?.recordset.length == 0) res.status(404).json({msg: 'No se encontró usuario con ese email'})
+
+        const userDB = user.recordset[0]
+        
+        let token = jwt.sign(
+            { id: userDB.id, email: userDB.email},
+            SECRET_JWT_KEY,
+            {
+                expiresIn: '1h'
+            })
         
         // Obtiene la contraseña hasheada guardada en la BD y con bcypt las compara (tiene sus propios metodos)
-        const contraseniaHash = user.recordset[0].contrasenia
+        const contraseniaHash = userDB.contrasenia
         await bcrypt.compare(contrasenia, contraseniaHash, (err, result) =>{
             if(err){
                 console.log(err);
                 return;
             }
             if(result){
-                console.log('contrasenias coinciden');
-                res.status(200).json({msg: 'coinciden'})
+                
+                res.status(200).json({msg: 'coinciden', data: userDB + token})
             } else{
-                console.log('no coinciden las psw');
+                
                 res.status(200).json({msg: 'no coinciden'})
             }
         })
