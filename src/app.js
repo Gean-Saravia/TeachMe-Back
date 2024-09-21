@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { APP_URL } from "./config.js";
 
 import userRoutes from './routes/users.routes.js'
+import coursesRoutes from './routes/courses.routes.js'
 
 const app = express();
 
@@ -16,5 +17,6 @@ app.use(cookieParser())
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/courses", coursesRoutes);
 
 export default app;
