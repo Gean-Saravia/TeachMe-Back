@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import { APP_URL } from "./config.js";
 
 import userRoutes from './routes/users.routes.js'
 
@@ -10,6 +12,7 @@ app.use(cors());
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(cookieParser())
 
 // Routes
 app.use("/api/users", userRoutes);
