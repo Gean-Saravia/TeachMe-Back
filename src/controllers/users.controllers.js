@@ -26,7 +26,13 @@ export const getToken = async (req,res) =>{
     }
     try{
         const data = jwt.verify(token, SECRET_JWT_KEY)
-        res.json({msg: "hola", data})
+        const userID = data.id
+        const pool = await getConnection();
+        const result = await pool
+            .request()
+            .input('id', userID)
+            .query("SELECT * FROM Usuarios WHERE id = @id");
+        res.json({msg: "Usuario encontrado con token", user: result.recordset })
     } catch(error){
         console.log(error);
         
@@ -72,8 +78,8 @@ export const register = async (req, res) => {
             .input('email', email)
             .query("SELECT * FROM Usuarios WHERE email = @email")
 
-        console.log(doesExist);
-        console.log(email);
+        // console.log(doesExist);
+        // console.log(email);
         
         // Si no existe una cuenta con ese mail, procede a registrarse con normalidad
         if (doesExist.recordset.length == 0){
@@ -155,7 +161,9 @@ export const access = async(req,res) =>{
             .input('email', email)
             .query("SELECT * FROM Usuarios WHERE email = @email")
 
-        if(user?.recordset.length == 0) res.status(404).json({msg: 'No se encontró usuario con ese email'})
+        if(user?.recordset.length == 0){
+            return res.status(404).json({msg: 'No se encontró usuario con ese email', success: false})
+        }
 
         const userDB = user.recordset[0]        
         
@@ -163,34 +171,29 @@ export const access = async(req,res) =>{
             { id: userDB.id, email: userDB.email},
             SECRET_JWT_KEY,
             {
-                expiresIn: '1h'
+                expiresIn: '30'
             })
         
         // Obtiene la contraseña hasheada guardada en la BD y con bcypt las compara (tiene sus propios metodos)
         const coinciden = await bcrypt.compare(contrasenia, userDB.contrasenia);
-        if (coinciden){
-            console.log("token:", token);
-            
-                res
-                /*
-                    .cookie('access_token', token, {
-                        httpOnly: true,
-                        secure: false,
-                        sameSite: 'Lax',
-                        maxAge: 1000 * 60 * 60
-                    })
-                */
-                    .status(200)
-                    .json({
-                        msg: `¡Que bueno verte de nuevo, ${userDB.nombre}!`, 
-                        data: userDB, 
-                        token: token, 
-                        success: true
-                    })
-            } else{
-                res.status(400).json({msg: 'Alguno de los datos no coinciden con nuestros registros', success: false})
-            }
+        if (!coinciden){
+            return res.status(400).json({msg: 'Alguno de los datos no coinciden con nuestros registros', success: false})
+        } 
+        /*
+            .cookie('access_token', token, {
+                httpOnly: true,
+                secure: false,
+                sameSite: 'Lax',
+                maxAge: 1000 * 60 * 60
+            })
+        */
+        return res.status(200).json({
+                msg: `¡Que bueno verte de nuevo, ${userDB.nombre}!`, 
+                data: userDB, 
+                token: token, 
+                success: true
+            })
     } catch(error){
-        res.status(500).json(error.message)
+        return res.status(500).json(error.message)
     }
 }
