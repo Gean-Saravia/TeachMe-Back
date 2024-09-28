@@ -7,6 +7,6 @@ const router = Router();
 // Routes
 router.get('/', getClass)
 router.post('/', createClass);
-router.put('/clases/:id', updateClass);
+router.put('/:id', updateClass);
 
 export default router;
