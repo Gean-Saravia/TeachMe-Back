@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REFRESH_TOKEN} from './config.js';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REFRESH_TOKEN, APP_URL, BACK_URL} from './config.js';
 const OAuth2 = google.auth.OAuth2;
 
 // Configuración de OAuth2
@@ -31,7 +31,7 @@ export const sendConfirmationEmail = async (email, hash, nombre, apellido) => {
             }
         });
 
-        const confirmationLink = `http://127.0.0.1:5500/TeachMe-Back/cuenta-confirmacion.html/${hash}`;
+        const confirmationLink = `${BACK_URL}/api/users/confirm/${hash}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: email,
@@ -111,7 +111,7 @@ export const sendConfirmationEmail = async (email, hash, nombre, apellido) => {
                     </head>
                     <body>
                         <div class="card">
-                            <a href="https://imgbb.com/"><img src="https://i.ibb.co/2NQGc6P/foto.png" alt="foto" border="0"></a>
+                            <a href='https://postimages.org/' target='_blank'><img src='https://i.postimg.cc/bwn5tWkk/foto.png' border='0' alt='foto'/></a>
                             <h1>¡Bienvenid@ ${nombre} ${apellido}!</h1>
                             <p>Muchas gracias por registrarse en nuestra plataforma. Para verificar su cuenta, ingrese al siguiente link:</p>
                                 <div class="button-container">

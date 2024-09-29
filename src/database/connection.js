@@ -15,7 +15,7 @@ const dbSettings = {
 export const getConnection = async () =>{
     try{
         const pool = await sql.connect(dbSettings);
-        console.log('Database connection established:', pool);
+        //console.log('Database connection established:', pool);
         return pool;
     } catch(error){
         console.error(error);
