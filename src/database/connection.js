@@ -5,11 +5,11 @@ const dbSettings = {
     user: DB_USER,
     password: DB_PASSWORD,
     server: DB_SERVER,
-    database: DB_DATABASE
-    // options: {
-    //     encrypt: true, // Si usas Azure SQL, de lo contrario, puedes omitirlo
-    //     trustServerCertificate: true // Solo si estás desarrollando localmente
-    // }
+    database: DB_DATABASE,
+    options: {
+         encrypt: true, // Si usas Azure SQL, de lo contrario, puedes omitirlo
+        trustServerCertificate: true // Solo si estás desarrollando localmente
+    }
 }
 
 export const getConnection = async () =>{
