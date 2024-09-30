@@ -8,6 +8,7 @@ import coursesRoutes from './routes/courses.routes.js';
 import classesRoutes from './routes/classes.routes.js'; 
 import hiringsRoutes from './routes/hirings.routes.js'
 import reviewsRoutes from './routes/review.routes.js'
+import paymentRoutes from './routes/payment.routes.js'
 
 const app = express();
 
@@ -23,5 +24,6 @@ app.use("/api/courses", coursesRoutes);
 app.use("/api/classes", classesRoutes);
 app.use("/api/hirings", hiringsRoutes)
 app.use("/api/reviews", reviewsRoutes)
+app.use("/api/payment", paymentRoutes)
 
 export default app;
