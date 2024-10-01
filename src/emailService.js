@@ -23,7 +23,7 @@ export const sendConfirmationEmail = async (email, hash, nombre, apellido) => {
             service: 'gmail',
             auth: {
                 type: 'OAuth2',
-                user: "teachmepruebas@gmail.com",
+                user: "teachme.verificacion@gmail.com",
                 clientId: GOOGLE_CLIENT_ID,
                 clientSecret: GOOGLE_CLIENT_SECRET,
                 refreshToken: REFRESH_TOKEN,
