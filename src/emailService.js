@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REFRESH_TOKEN, APP_URL, BACK_URL} from './config.js';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REFRESH_TOKEN, APP_URL, BACK_URL } from './config.js';
 const OAuth2 = google.auth.OAuth2;
 
 // Configuración de OAuth2
@@ -16,7 +16,7 @@ oauth2Client.setCredentials({
 
 export const sendConfirmationEmail = async (email, hash, nombre, apellido) => {
     try {
-        const accessToken = await oauth2Client.getAccessToken();
+        const accessToken = await oauth2Client.getAccessToken(); // Obtener el accessToken
 
         // Crear el transporter con OAuth2
         const transporter = nodemailer.createTransport({
@@ -27,15 +27,15 @@ export const sendConfirmationEmail = async (email, hash, nombre, apellido) => {
                 clientId: GOOGLE_CLIENT_ID,
                 clientSecret: GOOGLE_CLIENT_SECRET,
                 refreshToken: REFRESH_TOKEN,
-                accessToken: accessToken // Añadir el token de acceso
+                accessToken: accessToken.token, // Añadir el accessToken aquí
             }
         });
 
         const confirmationLink = `${BACK_URL}/api/users/confirm/${hash}`;
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: 'teachme.verificacion@gmail.com', // Cambié process.env.EMAIL_USER por el email directamente
             to: email,
-            subject: 'IMPORTANTE TEACHME',
+            subject: 'Verificación de cuenta',
             html: 
             `<html>
                     <head>
@@ -123,6 +123,7 @@ export const sendConfirmationEmail = async (email, hash, nombre, apellido) => {
                     </body>
                 </html>`,
         };
+        
         // Enviar el correo
         const info = await transporter.sendMail(mailOptions);
         console.log('Correo electrónico enviado correctamente:', info.response);

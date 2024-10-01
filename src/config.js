@@ -14,6 +14,4 @@ export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 export const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
 export const MP_KEY = process.env.MP_KEY;
-export const EMAIL_USER = process.env.EMAIL_USER;
-export const EMAIL_PASS = process.env.EMAIL_PASS;
 
