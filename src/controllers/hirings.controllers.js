@@ -2,22 +2,43 @@ import { getConnection, sql } from '../database/connection.js';
 
 //Trae las clases que el usuario haya contratado COMO ESTUDIANTE
 export const getHirings = async (req, res) => {
-    const { id } = req.query
+    const { id_profesor, id_alumno, id_contratacion } = req.query
     try {
         const pool = await getConnection();
         
-        if (id) {
+        if (id_profesor || id_alumno || id_contratacion) {
+            const queryIdProfesor = id_profesor ? req.query.id_profesor : null;
+            const queryIdAlumno = id_alumno ? req.query.id_alumno : null;
+            const queryIdContratacion = id_contratacion ? req.query.id_contratacion : null;
+
+            let sqlQuery = "SELECT Con.id, Con.fecha_contratacion, Con.total, Con.id_profesor, Con.id_alumno, Cla.titulo AS clase, Prof.nombre AS profesor, Prof.apellido AS profe_apellido, Alum.nombre AS alumno FROM Contrataciones AS Con JOIN Clases AS Cla ON Con.id_clase = Cla.id JOIN Usuarios AS Prof ON Con.id_profesor = Prof.id JOIN Usuarios AS Alum ON Con.id_alumno = Alum.id WHERE 1 = 1";
+
+            if (queryIdProfesor){
+                sqlQuery += " AND Con.id_profesor = @id_profesor"
+            }
+            if(queryIdAlumno){
+                sqlQuery += " AND Con.id_alumno = @id_alumno"
+            }
+            if(queryIdContratacion){
+                sqlQuery += " AND Con.id = @id_contratacion"
+            }
+
             const result = await pool.request()
-                .input("id", id)
-                .query("SELECT Con.id, Con.fecha_contratacion, Con.total, Cla.titulo AS clase, Prof.nombre AS profesor, Alum.nombre AS alumno FROM Contrataciones AS Con JOIN Clases AS Cla ON Con.id_clase = Cla.id JOIN Usuarios AS Prof ON Con.id_profesor = Prof.id JOIN Usuarios AS Alum ON Con.id_alumno = Alum.id WHERE Con.id_profesor = @id OR Con.id_alumno = @id");
+                .input("id_profesor", queryIdProfesor)
+                .input("id_alumno", queryIdAlumno)
+                .input("id_contratacion", queryIdContratacion)
+                .query(sqlQuery);
+            
+                return res.json(result.recordset);
+            }
+            
+            const result = await pool.request().query("SELECT Con.id, Con.fecha_contratacion, Con.total, Con.id_profesor, Con.id_alumno, Cla.titulo AS clase, Prof.nombre AS profesor, Alum.nombre AS alumno FROM Contrataciones AS Con JOIN Clases AS Cla ON Con.id_clase = Cla.id JOIN Usuarios AS Prof ON Con.id_profesor = Prof.id JOIN Usuarios AS Alum ON Con.id_alumno = Alum.id")
             
             if (result.recordset.length == 0) {
                 return res.json({ message: 'No se encontró ninguna contratacion' });
             }
-            return res.json(result.recordset);
-        }
-        
-    } catch (error) {
+            res.json(result.recordset)
+        } catch (error) {
         res.status(500).send(error.message);
     }
 };

@@ -2,29 +2,31 @@ import { getConnection, sql } from '../database/connection.js';
 
 //Trae las clases disponibles
 export const getClass = async (req, res) => {
-    let {titulo, id_materia} = req.query
+    let {titulo, id_materia, id_clase, id_profesor} = req.query
     try {
         const pool = await getConnection();
         
         // Si hay un parámetro de búsqueda por nombre de materia
-        if (titulo || id_materia) {
-            /*
-            const query = `%${req.query.titulo}%`; // Comodines para LIKE
-            const result = await pool.request()
-                .input("titulo", query)
-                .query("SELECT Cla.id, Cla.titulo, Cla.descripcion, Cla.precio_hora, Cla.fecha_creacion, Cla.id_materias, Prof.nombre AS profesor, Mat.nombre_materia AS materia FROM Clases AS Cla JOIN Usuarios AS Prof ON Cla.id_profesor = Prof.id JOIN Materias AS Mat ON Cla.id_materias = Mat.id WHERE titulo LIKE @titulo AND id_materias = @id_materia");
-            */
+        if (titulo || id_materia || id_clase || id_profesor) {
             const queryTitulo = titulo ? `%${req.query.titulo}%` : null;
             const queryIdMateria = id_materia ? req.query.id_materia : null;
+            const queryIdClase = id_clase ? req.query.id_clase : null;
+            const queryIdProfe = id_profesor ? req.query.id_profesor : null;
 
-            let sqlQuery = "SELECT Cla.id, Cla.titulo, Cla.descripcion, Cla.precio_hora, Cla.fecha_creacion, Cla.id_materias, Prof.nombre AS profesor, Mat.nombre_materia AS materia FROM Clases AS Cla JOIN Usuarios AS Prof ON Cla.id_profesor = Prof.id JOIN Materias AS Mat ON Cla.id_materias = Mat.id WHERE 1=1";
+            let sqlQuery = "SELECT Cla.id, Cla.titulo, Cla.descripcion, Cla.precio_hora, Cla.fecha_creacion, Cla.id_materias, Prof.nombre AS profesor, Prof.apellido AS profe_apellido, Prof.foto_perfil AS foto_profe, Prof.id AS profe_id, Mat.nombre_materia AS materia FROM Clases AS Cla JOIN Usuarios AS Prof ON Cla.id_profesor = Prof.id JOIN Materias AS Mat ON Cla.id_materias = Mat.id WHERE 1=1";
 
             if (queryTitulo) {
-                sqlQuery += " AND titulo LIKE @titulo";
+                sqlQuery += " AND Cla.titulo LIKE @titulo";
             }
             
             if (queryIdMateria) {
-                sqlQuery += " AND id_materias = @id_materia";
+                sqlQuery += " AND Cla.id_materias = @id_materia";
+            }
+            if (queryIdClase) {
+                sqlQuery += " AND Cla.id = @id_clase";
+            }
+            if (queryIdProfe) {
+                sqlQuery += " AND Cla.id_profesor = @id_profesor";
             }
             /*
             if (result.recordset.length == 0) {
@@ -34,12 +36,14 @@ export const getClass = async (req, res) => {
             const result = await pool.request()
                 .input("titulo", queryTitulo)
                 .input("id_materia", queryIdMateria)
+                .input("id_clase", queryIdClase)
+                .input("id_profesor", queryIdProfe)
                 .query(sqlQuery);
             return res.json(result.recordset);
         }
 
         // Si no hay parámetro, traer todas las materias
-        const result = await pool.request().query("SELECT Cla.id, Cla.titulo, Cla.descripcion, Cla.precio_hora, Cla.fecha_creacion, Cla.id_materias, Prof.nombre AS profesor, Mat.nombre_materia AS materia FROM Clases AS Cla JOIN Usuarios AS Prof ON Cla.id_profesor = Prof.id JOIN Materias AS Mat ON Cla.id_materias = Mat.id");
+        const result = await pool.request().query("SELECT Cla.id, Cla.titulo, Cla.descripcion, Cla.precio_hora, Cla.fecha_creacion, Cla.id_materias, Prof.nombre AS profesor, Prof.apellido AS profe_apellido, Prof.foto_perfil AS foto_profe, Prof.id AS profe_id, Mat.nombre_materia AS materia FROM Clases AS Cla JOIN Usuarios AS Prof ON Cla.id_profesor = Prof.id JOIN Materias AS Mat ON Cla.id_materias = Mat.id");
 
         if (result.recordset.length == 0) {
             return res.json({ message: 'No hay clases' });
